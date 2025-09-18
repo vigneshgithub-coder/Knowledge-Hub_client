@@ -16,10 +16,15 @@ export default function AddEditDoc({ mode }) {
   useEffect(() => {
     const load = async () => {
       if (isEdit && id) {
-        const { data } = await api.get(`/api/documents/${id}`);
-        setTitle(data.title || '');
-        setContent(data.content || '');
-        setTags(data.tags || []);
+        try {
+          const { data } = await api.get(`/api/documents/${id}`);
+          setTitle(data.title || '');
+          setContent(data.content || '');
+          setTags(data.tags || []);
+        } catch (error) {
+          console.error('Error loading document:', error);
+          // Optionally show an error message to the user
+        }
       }
     };
     load();

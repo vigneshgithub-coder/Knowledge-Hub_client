@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Grid, Paper, Typography, TextField, Button, Stack, Chip, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -11,7 +11,8 @@ export default function Dashboard() {
   const [filter, setFilter] = useState('');
   const [selectedTags, setSelectedTags] = useState([]);
   const [loading, setLoading] = useState(false);
-  const currentUser = React.useMemo(() => {
+  
+  const currentUser = useMemo(() => {
     try {
       return JSON.parse(localStorage.getItem('user')) || null;
     } catch (_) {
@@ -28,7 +29,7 @@ export default function Dashboard() {
     return Array.from(tags).sort();
   }, [docs]);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
       const params = {};
@@ -46,11 +47,11 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter, selectedTags]);
 
   useEffect(() => {
     load();
-  }, [selectedTags]); // Reload when selectedTags changes
+  }, [load]);
 
   const onOpen = (doc) => navigate(`/docs/${doc._id}`);
 
@@ -58,6 +59,7 @@ export default function Dashboard() {
     await api.post(`/api/documents/${doc._id}/summarize`);
     load();
   };
+
   const onTags = async (doc) => {
     await api.post(`/api/documents/${doc._id}/tags`);
     load();
